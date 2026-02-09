@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Income Tax Calculator - FY 2024-25</title>
+    <!-- SheetJS library for Excel import/export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            margin-top: 10px;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .deduction-input {
+            margin-left: 30px;
+            margin-top: 10px;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .result-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .tax-breakdown {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .total-tax {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .total-tax h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .total-tax .amount {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .info-box p {
+            color: #1565C0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .radio-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🇮🇳 Indian Income Tax Calculator</h1>
+            <p>Financial Year 2024-25 (Assessment Year 2025-26)</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <p><strong>Note:</strong> This calculator is based on the new tax regime which is now the default regime from FY 2023-24. The old regime is still available as an option.</p>
+            </div>
+
+            <div class="info-box" style="background: #fff3e0; border-left-color: #ff9800;">
+                <p><strong>📋 ITR Forms Guide:</strong></p>
+                <p style="margin-top: 8px; font-size: 13px;">
+                    <strong>ITR-1 (Sahaj):</strong> For individuals with salary, one house property & other sources (income up to ₹50L)<br>
+                    <strong>ITR-2:</strong> For individuals/HUFs with capital gains, multiple properties, or income above ₹50L<br>
+                    <strong>ITR-3:</strong> For individuals/HUFs with business/professional income<br>
+                    <strong>ITR-4 (Sugam):</strong> For presumptive business income under Section 44AD/44ADA (up to ₹50L)<br>
+                    <em>This calculator will automatically recommend the correct ITR form based on your income details.</em>
+                </p>
+            </div>
+
+            <form id="taxForm">
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h2 class="section-title">Personal Information</h2>
+                    
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>PAN Number</label>
+                        <input type="text" id="panNumber" placeholder="e.g., ABCDE1234F" maxlength="10" pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}" style="text-transform: uppercase;">
+                        <small style="color: #666; display: block; margin-top: 5px;">10 character PAN (e.g., ABCDE1234F)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Occupation/Job Title</label>
+                        <input type="text" id="occupation" placeholder="e.g., Software Engineer, Business Owner">
+                    </div>
+                </div>
+
+                <!-- Personal Details -->
+                <div class="form-section">
+                    <h2 class="section-title">Tax Details</h2>
+                    
+                    <div class="form-group">
+                        <label>Age Category</label>
+                        <select id="ageCategory" required>
+                            <option value="below60">Below 60 years</option>
+                            <option value="60to80">60 to 80 years (Senior Citizen)</option>
+                            <option value="above80">Above 80 years (Super Senior Citizen)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tax Regime</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="newRegime" name="regime" value="new" checked>
+                                <label for="newRegime">New Regime (Default)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="oldRegime" name="regime" value="old">
+                                <label for="oldRegime">Old Regime</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Income Details -->
+                <div class="form-section">
+                    <h2 class="section-title">Income from Salary</h2>
+                    
+                    <div class="form-group">
+                        <label>Gross Annual Salary (₹)</label>
+                        <input type="number" id="grossIncome" placeholder="e.g., 1200000" required min="0" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Professional Tax Paid (₹)</label>
+                        <input type="number" id="professionalTax" placeholder="e.g., 2500" value="0" min="0" step="100">
+                        <small style="color: #666; display: block; margin-top: 5px;">Deductible from salary income</small>
+                    </div>
+                </div>
+
+                <!-- Other Income Sources -->
+                <div class="form-section">
+                    <h2 class="section-title">Other Income Sources</h2>
+                    
+                    <div class="form-group">
+                        <label>Interest Income (Savings, FD, etc.) (₹)</label>
+                        <input type="number" id="interestIncome" placeholder="0" value="0" min="0" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Rental Income (₹)</label>
+                        <input type="number" id="rentalIncome" placeholder="0" value="0" min="0" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Business/Professional Income (₹)</label>
+                        <input type="number" id="businessIncome" placeholder="0" value="0" min="0" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Intraday Trading Income/Loss (₹)</label>
+                        <input type="number" id="intradayIncome" placeholder="0 (use negative for loss)" value="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Speculative Business Income - taxed as per slab rates. Enter negative value for loss.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Futures & Options (F&O) Trading Income/Loss (₹)</label>
+                        <input type="number" id="foIncome" placeholder="0 (use negative for loss)" value="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Non-Speculative Business Income - taxed as per slab rates. Enter negative value for loss.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dividend Income (₹)</label>
+                        <input type="number" id="dividendIncome" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Taxable as per slab rates</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Any Other Income (₹)</label>
+                        <input type="number" id="otherIncome" placeholder="0" value="0" min="0" step="1000">
+                    </div>
+                </div>
+
+                <!-- Capital Gains -->
+                <div class="form-section">
+                    <h2 class="section-title">Capital Gains</h2>
+                    
+                    <div class="info-box">
+                        <p><strong>Budget 2024 Updates:</strong> LTCG on equity/equity MF now taxed at 12.5% (above ₹1.25L exempt). STCG on equity taxed at 20%. Other LTCG at 12.5%, STCG as per slab.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Short Term Capital Gains - Equity/Equity Mutual Funds (₹)</label>
+                        <input type="number" id="stcgEquity" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Taxed at 20% (Budget 2024)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Long Term Capital Gains - Equity/Equity Mutual Funds (₹)</label>
+                        <input type="number" id="ltcgEquity" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Taxed at 12.5% above ₹1,25,000 exemption (Budget 2024)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Short Term Capital Gains - Other Assets (₹)</label>
+                        <input type="number" id="stcgOther" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Taxed as per applicable slab rates</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Long Term Capital Gains - Other Assets (Property, Debt MF, etc.) (₹)</label>
+                        <input type="number" id="ltcgOther" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Taxed at 12.5% (Budget 2024)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Crypto/VDA Income (₹)</label>
+                        <input type="number" id="cryptoIncome" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Taxed at 30% (Section 115BBH) + 4% Cess</small>
+                    </div>
+                </div>
+
+                <!-- Deductions (Old Regime Only) -->
+                <div class="form-section" id="deductionsSection" style="display: none;">
+                    <h2 class="section-title">Deductions (Old Regime Only)</h2>
+                    
+                    <div class="form-group">
+                        <label>Standard Deduction (₹)</label>
+                        <input type="number" id="standardDeduction" value="50000" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">₹50,000 for salaried individuals</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80C (PPF, ELSS, Life Insurance, EPF, etc.) (₹)</label>
+                        <input type="number" id="sec80C" placeholder="Maximum ₹1,50,000" value="0" min="0" max="150000" step="1000">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80CCD(1B) - Additional NPS (₹)</label>
+                        <input type="number" id="sec80CCD1B" placeholder="Maximum ₹50,000" value="0" min="0" max="50000" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Over and above 80C limit</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80D (Health Insurance Premium) (₹)</label>
+                        <input type="number" id="sec80D" placeholder="Maximum ₹25,000 / ₹50,000" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">₹25,000 for self/family, ₹50,000 for senior citizens</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80D - Parents Health Insurance (₹)</label>
+                        <input type="number" id="sec80DParents" placeholder="Maximum ₹25,000 / ₹50,000" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Additional ₹25,000/₹50,000 for parents</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80E (Education Loan Interest) (₹)</label>
+                        <input type="number" id="sec80E" placeholder="No upper limit" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Interest on education loan for higher studies</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80EE (Home Loan Interest - First Time Buyer) (₹)</label>
+                        <input type="number" id="sec80EE" placeholder="Maximum ₹50,000" value="0" min="0" max="50000" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Additional deduction for first-time home buyers</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80G (Donations to Charitable Institutions) (₹)</label>
+                        <input type="number" id="sec80G" placeholder="Varies by donation type" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">50% or 100% as applicable</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80GG (Rent Paid - No HRA) (₹)</label>
+                        <input type="number" id="sec80GG" placeholder="Max ₹5,000/month" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">For those not receiving HRA</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80TTA/80TTB (Interest on Savings) (₹)</label>
+                        <input type="number" id="sec80TTA" placeholder="₹10,000 / ₹50,000" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">₹10,000 for below 60 years, ₹50,000 for senior citizens (80TTB)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 80U (Disability) (₹)</label>
+                        <input type="number" id="sec80U" placeholder="₹75,000 / ₹1,25,000" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">₹75,000 for disability, ₹1,25,000 for severe disability</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>HRA (House Rent Allowance) Exemption (₹)</label>
+                        <input type="number" id="hra" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Exempt portion of HRA received</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Section 24(b) - Home Loan Interest (Self-Occupied) (₹)</label>
+                        <input type="number" id="homeLoanInterest" placeholder="Maximum ₹2,00,000" value="0" min="0" max="200000" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Maximum ₹2,00,000 for self-occupied property</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Leave Travel Allowance (LTA) Exemption (₹)</label>
+                        <input type="number" id="lta" placeholder="0" value="0" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">Exempt portion of LTA as per rules</small>
+                    </div>
+                </div>
+
+                <!-- New Regime Standard Deduction -->
+                <div class="form-section" id="newRegimeDeductions">
+                    <h2 class="section-title">Deductions (New Regime)</h2>
+                    
+                    <div class="form-group">
+                        <label>Standard Deduction (₹)</label>
+                        <input type="number" id="newStandardDeduction" value="75000" min="0" step="1000">
+                        <small style="color: #666; display: block; margin-top: 5px;">₹75,000 for FY 2024-25 (New Regime)</small>
+                    </div>
+                </div>
+
+                <button type="submit" class="calculate-btn">Calculate Tax</button>
+
+                <!-- Import/Export Buttons -->
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button type="button" class="calculate-btn" id="exportBtn" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                        📊 Export to Excel
+                    </button>
+                    <button type="button" class="calculate-btn" id="importBtn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        📁 Import from Excel
+                    </button>
+                    <input type="file" id="importFile" accept=".xlsx,.xls" style="display: none;">
+                </div>
+            </form>
+
+            <!-- Results Section -->
+            <div id="results" class="results">
+                <h2 class="section-title">Tax Calculation Summary</h2>
+                
+                <!-- ITR Form Recommendation -->
+                <div id="itrRecommendation" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px; font-size: 18px;">📋 Recommended ITR Form</h3>
+                    <div style="font-size: 24px; font-weight: 700; margin-bottom: 10px;" id="itrFormName">ITR-1</div>
+                    <div style="font-size: 14px; opacity: 0.9; line-height: 1.6;" id="itrFormReason"></div>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Gross Total Income</span>
+                    <span class="result-value" id="displayGrossIncome">₹0</span>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Total Deductions</span>
+                    <span class="result-value" id="displayDeductions">₹0</span>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Taxable Income</span>
+                    <span class="result-value" id="displayTaxableIncome">₹0</span>
+                </div>
+
+                <div class="tax-breakdown">
+                    <h3 style="margin-bottom: 15px; color: #667eea;">Tax Breakdown</h3>
+                    <div id="taxBreakdown"></div>
+                </div>
+
+                <div class="result-row">
+                    <span class="result-label">Income Tax</span>
+                    <span class="result-value" id="displayIncomeTax">₹0</span>
+                </div>
+                
+                <div class="result-row">
+                    <span class="result-label">Health & Education Cess (4%)</span>
+                    <span class="result-value" id="displayCess">₹0</span>
+                </div>
+
+                <div class="total-tax">
+                    <h3>Total Tax Payable</h3>
+                    <div class="amount" id="displayTotalTax">₹0</div>
+                </div>
+
+                <div class="total-tax" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); margin-top: 15px;">
+                    <h3>In-Hand Annual Income</h3>
+                    <div class="amount" id="displayNetIncome">₹0</div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="text-align: center; padding: 30px; background: #f8f9fa; border-top: 2px solid #e0e0e0;">
+                <p style="color: #666; font-size: 14px; margin: 0;">
+                    Developed and Designed by <strong style="color: #667eea;">Shamsudeen EP</strong>
+                </p>
+                <p style="color: #999; font-size: 12px; margin-top: 5px;">
+                    © 2025 | Indian Income Tax Calculator FY 2024-25
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle deductions section based on regime
+        document.querySelectorAll('input[name="regime"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const deductionsSection = document.getElementById('deductionsSection');
+                const newRegimeDeductions = document.getElementById('newRegimeDeductions');
+                
+                if (this.value === 'old') {
+                    deductionsSection.style.display = 'block';
+                    newRegimeDeductions.style.display = 'none';
+                } else {
+                    deductionsSection.style.display = 'none';
+                    newRegimeDeductions.style.display = 'block';
+                }
+            });
+        });
+
+        // Form submission
+        document.getElementById('taxForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            calculateTax();
+        });
+
+        // Function to determine ITR form
+        function determineITRForm(incomeData) {
+            const {
+                salaryIncome,
+                businessIncome,
+                intradayIncome,
+                foIncome,
+                rentalIncome,
+                ltcgEquity,
+                stcgEquity,
+                ltcgOther,
+                stcgOther,
+                cryptoIncome,
+                totalIncome,
+                interestIncome,
+                dividendIncome,
+                otherIncome
+            } = incomeData;
+
+            let itrForm = '';
+            let reasons = [];
+
+            // ITR-7: For trusts, political parties, institutions
+            // (Not applicable in this calculator, skip)
+
+            // ITR-6: For companies
+            // (Not applicable in this calculator, skip)
+
+            // ITR-5: For firms, LLPs, AOPs, BOIs
+            // (Not applicable in this calculator, skip)
+
+            // ITR-4: Presumptive taxation for business/profession
+            if ((businessIncome > 0 || foIncome > 0) && 
+                totalIncome <= 5000000 && 
+                intradayIncome === 0 && 
+                ltcgEquity === 0 && ltcgOther === 0 && 
+                cryptoIncome === 0 &&
+                rentalIncome === 0) {
+                itrForm = 'ITR-4 (Sugam)';
+                reasons.push('Applicable for presumptive business income under Section 44AD/44ADA');
+                reasons.push('Total income is below ₹50 lakhs');
+                reasons.push('No capital gains or speculative income');
+            }
+            // ITR-3: For business/professional income
+            else if (businessIncome > 0 || intradayIncome > 0 || foIncome > 0) {
+                itrForm = 'ITR-3';
+                reasons.push('You have business or professional income');
+                if (intradayIncome > 0 || intradayIncome < 0) {
+                    reasons.push('Intraday trading income (speculative business) present');
+                }
+                if (foIncome > 0 || foIncome < 0) {
+                    reasons.push('F&O trading income (non-speculative business) present');
+                }
+                if (businessIncome > 0) {
+                    reasons.push('Other business/professional income present');
+                }
+            }
+            // ITR-2: For capital gains, multiple house properties, foreign assets/income
+            else if (ltcgEquity > 0 || stcgEquity > 0 || ltcgOther > 0 || stcgOther > 0 || 
+                     cryptoIncome > 0 || rentalIncome > 0) {
+                itrForm = 'ITR-2';
+                if (ltcgEquity > 0 || stcgEquity > 0) {
+                    reasons.push('You have capital gains from equity/equity mutual funds');
+                }
+                if (ltcgOther > 0 || stcgOther > 0) {
+                    reasons.push('You have capital gains from other assets (property, debt funds, etc.)');
+                }
+                if (cryptoIncome > 0) {
+                    reasons.push('You have income from cryptocurrency/VDA');
+                }
+                if (rentalIncome > 0) {
+                    reasons.push('You have income from house property (rental income)');
+                }
+                reasons.push('Cannot use ITR-1 due to these income sources');
+            }
+            // ITR-1 (Sahaj): For salary, pension, one house property (self-occupied), other sources
+            else if (totalIncome <= 5000000 && 
+                     (salaryIncome > 0 || interestIncome > 0 || dividendIncome > 0 || otherIncome > 0)) {
+                itrForm = 'ITR-1 (Sahaj)';
+                reasons.push('You have salary income and/or income from other sources');
+                reasons.push('Total income is below ₹50 lakhs');
+                reasons.push('No business income or capital gains');
+                reasons.push('This is the simplest form to file');
+            }
+            // ITR-2: If income exceeds 50 lakhs with only salary
+            else if (totalIncome > 5000000) {
+                itrForm = 'ITR-2';
+                reasons.push('Your total income exceeds ₹50 lakhs');
+                reasons.push('ITR-1 cannot be used for income above ₹50 lakhs');
+            }
+            // Default to ITR-2 for safety
+            else {
+                itrForm = 'ITR-2';
+                reasons.push('Based on your income sources, ITR-2 is recommended');
+            }
+
+            return {
+                form: itrForm,
+                reasons: reasons
+            };
+        }
+
+        function calculateTax() {
+            // Get personal information
+            const fullName = document.getElementById('fullName').value;
+            const panNumber = document.getElementById('panNumber').value.toUpperCase();
+            const occupation = document.getElementById('occupation').value;
+            
+            // Get form values
+            const regime = document.querySelector('input[name="regime"]:checked').value;
+            const ageCategory = document.getElementById('ageCategory').value;
+            
+            // Salary Income
+            const grossIncome = parseFloat(document.getElementById('grossIncome').value) || 0;
+            const professionalTax = parseFloat(document.getElementById('professionalTax').value) || 0;
+            const salaryIncome = grossIncome - professionalTax;
+            
+            // Other Income Sources
+            const interestIncome = parseFloat(document.getElementById('interestIncome').value) || 0;
+            const rentalIncome = parseFloat(document.getElementById('rentalIncome').value) || 0;
+            const businessIncome = parseFloat(document.getElementById('businessIncome').value) || 0;
+            const intradayIncome = parseFloat(document.getElementById('intradayIncome').value) || 0;
+            const foIncome = parseFloat(document.getElementById('foIncome').value) || 0;
+            const dividendIncome = parseFloat(document.getElementById('dividendIncome').value) || 0;
+            const otherIncome = parseFloat(document.getElementById('otherIncome').value) || 0;
+            
+            // Capital Gains
+            const stcgEquity = parseFloat(document.getElementById('stcgEquity').value) || 0;
+            const ltcgEquity = parseFloat(document.getElementById('ltcgEquity').value) || 0;
+            const stcgOther = parseFloat(document.getElementById('stcgOther').value) || 0;
+            const ltcgOther = parseFloat(document.getElementById('ltcgOther').value) || 0;
+            const cryptoIncome = parseFloat(document.getElementById('cryptoIncome').value) || 0;
+            
+            // Calculate total income under normal provisions (including F&O and Intraday)
+            let totalRegularIncome = salaryIncome + interestIncome + rentalIncome + businessIncome + 
+                                     intradayIncome + foIncome + dividendIncome + otherIncome + stcgOther;
+            
+            let totalDeductions = 0;
+            let taxableIncome = totalRegularIncome;
+
+            // Calculate deductions
+            if (regime === 'old') {
+                const standardDeduction = parseFloat(document.getElementById('standardDeduction').value) || 0;
+                const sec80C = Math.min(parseFloat(document.getElementById('sec80C').value) || 0, 150000);
+                const sec80CCD1B = Math.min(parseFloat(document.getElementById('sec80CCD1B').value) || 0, 50000);
+                const sec80D = parseFloat(document.getElementById('sec80D').value) || 0;
+                const sec80DParents = parseFloat(document.getElementById('sec80DParents').value) || 0;
+                const sec80E = parseFloat(document.getElementById('sec80E').value) || 0;
+                const sec80EE = Math.min(parseFloat(document.getElementById('sec80EE').value) || 0, 50000);
+                const sec80G = parseFloat(document.getElementById('sec80G').value) || 0;
+                const sec80GG = parseFloat(document.getElementById('sec80GG').value) || 0;
+                const sec80TTA = parseFloat(document.getElementById('sec80TTA').value) || 0;
+                const sec80U = parseFloat(document.getElementById('sec80U').value) || 0;
+                const hra = parseFloat(document.getElementById('hra').value) || 0;
+                const homeLoanInterest = Math.min(parseFloat(document.getElementById('homeLoanInterest').value) || 0, 200000);
+                const lta = parseFloat(document.getElementById('lta').value) || 0;
+                
+                totalDeductions = standardDeduction + sec80C + sec80CCD1B + sec80D + sec80DParents + 
+                                 sec80E + sec80EE + sec80G + sec80GG + sec80TTA + sec80U + 
+                                 hra + homeLoanInterest + lta;
+                taxableIncome -= totalDeductions;
+            } else {
+                // New regime - only standard deduction
+                const newStandardDeduction = parseFloat(document.getElementById('newStandardDeduction').value) || 0;
+                totalDeductions = newStandardDeduction;
+                taxableIncome -= totalDeductions;
+            }
+
+            // Calculate tax on regular income based on regime
+            let regularIncomeTax = 0;
+            let breakdownHTML = '<h4 style="margin-bottom: 10px;">Tax on Regular Income:</h4>';
+
+            if (regime === 'new') {
+                // New Tax Regime Slabs for FY 2024-25
+                if (taxableIncome <= 300000) {
+                    regularIncomeTax = 0;
+                    breakdownHTML += '<div class="result-row"><span>₹0 - ₹3,00,000</span><span>Nil</span></div>';
+                } else if (taxableIncome <= 700000) {
+                    regularIncomeTax = (taxableIncome - 300000) * 0.05;
+                    breakdownHTML += `
+                        <div class="result-row"><span>₹0 - ₹3,00,000</span><span>Nil</span></div>
+                        <div class="result-row"><span>₹3,00,001 - ₹${taxableIncome.toLocaleString('en-IN')}</span><span>₹${regularIncomeTax.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>
+                    `;
+                } else if (taxableIncome <= 1000000) {
+                    regularIncomeTax = 400000 * 0.05 + (taxableIncome - 700000) * 0.10;
+                    breakdownHTML += `
+                        <div class="result-row"><span>₹0 - ₹3,00,000</span><span>Nil</span></div>
+                        <div class="result-row"><span>₹3,00,001 - ₹7,00,000</span><span>₹20,000</span></div>
+                        <div class="result-row"><span>₹7,00,001 - ₹${taxableIncome.toLocaleString('en-IN')}</span><span>₹${((taxableIncome - 700000) * 0.10).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>
+                    `;
+                } else if (taxableIncome <= 1200000) {
+                    regularIncomeTax = 400000 * 0.05 + 300000 * 0.10 + (taxableIncome - 1000000) * 0.15;
+                    breakdownHTML += `
+                        <div class="result-row"><span>₹0 - ₹3,00,000</span><span>Nil</span></div>
+                        <div class="result-row"><span>₹3,00,001 - ₹7,00,000</span><span>₹20,000</span></div>
+                        <div class="result-row"><span>₹7,00,001 - ₹10,00,000</span><span>₹30,000</span></div>
+                        <div class="result-row"><span>₹10,00,001 - ₹${taxableIncome.toLocaleString('en-IN')}</span><span>₹${((taxableIncome - 1000000) * 0.15).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>
+                    `;
+                } else if (taxableIncome <= 1500000) {
+                    regularIncomeTax = 400000 * 0.05 + 300000 * 0.10 + 200000 * 0.15 + (taxableIncome - 1200000) * 0.20;
+                    breakdownHTML += `
+                        <div class="result-row"><span>₹0 - ₹3,00,000</span><span>Nil</span></div>
+                        <div class="result-row"><span>₹3,00,001 - ₹7,00,000</span><span>₹20,000</span></div>
+                        <div class="result-row"><span>₹7,00,001 - ₹10,00,000</span><span>₹30,000</span></div>
+                        <div class="result-row"><span>₹10,00,001 - ₹12,00,000</span><span>₹30,000</span></div>
+                        <div class="result-row"><span>₹12,00,001 - ₹${taxableIncome.toLocaleString('en-IN')}</span><span>₹${((taxableIncome - 1200000) * 0.20).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>
+                    `;
+                } else {
+                    regularIncomeTax = 400000 * 0.05 + 300000 * 0.10 + 200000 * 0.15 + 300000 * 0.20 + (taxableIncome - 1500000) * 0.30;
+                    breakdownHTML += `
+                        <div class="result-row"><span>₹0 - ₹3,00,000</span><span>Nil</span></div>
+                        <div class="result-row"><span>₹3,00,001 - ₹7,00,000</span><span>₹20,000</span></div>
+                        <div class="result-row"><span>₹7,00,001 - ₹10,00,000</span><span>₹30,000</span></div>
+                        <div class="result-row"><span>₹10,00,001 - ₹12,00,000</span><span>₹30,000</span></div>
+                        <div class="result-row"><span>₹12,00,001 - ₹15,00,000</span><span>₹60,000</span></div>
+                        <div class="result-row"><span>Above ₹15,00,000</span><span>₹${((taxableIncome - 1500000) * 0.30).toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>
+                    `;
+                }
+            } else {
+                // Old Tax Regime
+                const exemptionLimit = ageCategory === 'below60' ? 250000 : ageCategory === '60to80' ? 300000 : 500000;
+                
+                if (taxableIncome <= exemptionLimit) {
+                    regularIncomeTax = 0;
+                } else if (taxableIncome <= 500000) {
+                    regularIncomeTax = (taxableIncome - exemptionLimit) * 0.05;
+                } else if (taxableIncome <= 1000000) {
+                    regularIncomeTax = (500000 - exemptionLimit) * 0.05 + (taxableIncome - 500000) * 0.20;
+                } else {
+                    regularIncomeTax = (500000 - exemptionLimit) * 0.05 + 500000 * 0.20 + (taxableIncome - 1000000) * 0.30;
+                }
+
+                breakdownHTML += `<div class="result-row"><span>Tax as per old regime slabs</span><span>₹${regularIncomeTax.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            }
+
+            // Apply rebate under section 87A (both regimes) - only on regular income
+            const rebateLimit = regime === 'new' ? 700000 : 500000;
+            if (taxableIncome <= rebateLimit) {
+                regularIncomeTax = 0;
+                breakdownHTML += '<div class="result-row" style="color: green;"><span>Rebate u/s 87A</span><span>Full rebate on regular income</span></div>';
+            }
+
+            // Calculate tax on STCG Equity (20% flat as per Budget 2024)
+            let stcgEquityTax = 0;
+            if (stcgEquity > 0) {
+                stcgEquityTax = stcgEquity * 0.20;
+                breakdownHTML += `<h4 style="margin-top: 15px; margin-bottom: 10px;">Tax on Short Term Capital Gains (Equity):</h4>`;
+                breakdownHTML += `<div class="result-row"><span>STCG Equity @ 20%</span><span>₹${stcgEquityTax.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            }
+
+            // Calculate tax on LTCG Equity (12.5% above 1.25L exemption as per Budget 2024)
+            let ltcgEquityTax = 0;
+            if (ltcgEquity > 0) {
+                const ltcgExemption = 125000;
+                const taxableLTCGEquity = Math.max(0, ltcgEquity - ltcgExemption);
+                ltcgEquityTax = taxableLTCGEquity * 0.125;
+                breakdownHTML += `<h4 style="margin-top: 15px; margin-bottom: 10px;">Tax on Long Term Capital Gains (Equity):</h4>`;
+                if (ltcgEquity <= ltcgExemption) {
+                    breakdownHTML += `<div class="result-row"><span>LTCG Equity (below exemption)</span><span>Nil</span></div>`;
+                } else {
+                    breakdownHTML += `<div class="result-row"><span>LTCG Equity Exemption</span><span>₹1,25,000</span></div>`;
+                    breakdownHTML += `<div class="result-row"><span>Taxable LTCG @ 12.5%</span><span>₹${ltcgEquityTax.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+                }
+            }
+
+            // Calculate tax on LTCG Other (12.5% as per Budget 2024)
+            let ltcgOtherTax = 0;
+            if (ltcgOther > 0) {
+                ltcgOtherTax = ltcgOther * 0.125;
+                breakdownHTML += `<h4 style="margin-top: 15px; margin-bottom: 10px;">Tax on Long Term Capital Gains (Other Assets):</h4>`;
+                breakdownHTML += `<div class="result-row"><span>LTCG Other @ 12.5%</span><span>₹${ltcgOtherTax.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            }
+
+            // Calculate tax on Crypto/VDA (30% flat + no deductions except cost)
+            let cryptoTax = 0;
+            if (cryptoIncome > 0) {
+                cryptoTax = cryptoIncome * 0.30;
+                breakdownHTML += `<h4 style="margin-top: 15px; margin-bottom: 10px;">Tax on Crypto/VDA Income:</h4>`;
+                breakdownHTML += `<div class="result-row"><span>Crypto @ 30% (Section 115BBH)</span><span>₹${cryptoTax.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            }
+
+            // Total tax before cess
+            const totalIncomeTax = regularIncomeTax + stcgEquityTax + ltcgEquityTax + ltcgOtherTax + cryptoTax;
+
+            // Add surcharge if applicable (for total income above certain limits)
+            let surcharge = 0;
+            const totalIncomeForSurcharge = totalRegularIncome + stcgEquity + ltcgEquity + stcgOther + ltcgOther + cryptoIncome;
+            
+            if (totalIncomeForSurcharge > 5000000 && totalIncomeForSurcharge <= 10000000) {
+                surcharge = totalIncomeTax * 0.10;
+                breakdownHTML += `<div class="result-row" style="margin-top: 10px;"><span>Surcharge @ 10%</span><span>₹${surcharge.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            } else if (totalIncomeForSurcharge > 10000000 && totalIncomeForSurcharge <= 20000000) {
+                surcharge = totalIncomeTax * 0.15;
+                breakdownHTML += `<div class="result-row" style="margin-top: 10px;"><span>Surcharge @ 15%</span><span>₹${surcharge.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            } else if (totalIncomeForSurcharge > 20000000 && totalIncomeForSurcharge <= 50000000) {
+                surcharge = totalIncomeTax * 0.25;
+                breakdownHTML += `<div class="result-row" style="margin-top: 10px;"><span>Surcharge @ 25%</span><span>₹${surcharge.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            } else if (totalIncomeForSurcharge > 50000000) {
+                surcharge = totalIncomeTax * 0.37;
+                breakdownHTML += `<div class="result-row" style="margin-top: 10px;"><span>Surcharge @ 37%</span><span>₹${surcharge.toLocaleString('en-IN', {maximumFractionDigits: 0})}</span></div>`;
+            }
+
+            const taxWithSurcharge = totalIncomeTax + surcharge;
+
+            // Calculate cess (4% on tax + surcharge)
+            const cess = taxWithSurcharge * 0.04;
+            const totalTax = taxWithSurcharge + cess;
+            
+            // Calculate net income
+            const totalGrossIncome = totalRegularIncome + stcgEquity + ltcgEquity + stcgOther + ltcgOther + cryptoIncome;
+            const netIncome = totalGrossIncome - totalTax;
+
+            // Determine ITR Form
+            const itrData = determineITRForm({
+                salaryIncome: salaryIncome,
+                businessIncome: businessIncome,
+                intradayIncome: intradayIncome,
+                foIncome: foIncome,
+                rentalIncome: rentalIncome,
+                ltcgEquity: ltcgEquity,
+                stcgEquity: stcgEquity,
+                ltcgOther: ltcgOther,
+                stcgOther: stcgOther,
+                cryptoIncome: cryptoIncome,
+                totalIncome: totalGrossIncome,
+                interestIncome: interestIncome,
+                dividendIncome: dividendIncome,
+                otherIncome: otherIncome
+            });
+
+            // Display ITR Form Recommendation
+            document.getElementById('itrFormName').textContent = itrData.form;
+            let reasonsHTML = '<ul style="margin: 10px 0 0 20px; padding: 0;">';
+            itrData.reasons.forEach(reason => {
+                reasonsHTML += `<li style="margin-bottom: 5px;">${reason}</li>`;
+            });
+            reasonsHTML += '</ul>';
+            document.getElementById('itrFormReason').innerHTML = reasonsHTML;
+
+            // Display results
+            document.getElementById('displayGrossIncome').textContent = '₹' + totalGrossIncome.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('displayDeductions').textContent = '₹' + totalDeductions.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('displayTaxableIncome').textContent = '₹' + taxableIncome.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('taxBreakdown').innerHTML = breakdownHTML;
+            document.getElementById('displayIncomeTax').textContent = '₹' + totalIncomeTax.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('displayCess').textContent = '₹' + cess.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('displayTotalTax').textContent = '₹' + totalTax.toLocaleString('en-IN', {maximumFractionDigits: 0});
+            document.getElementById('displayNetIncome').textContent = '₹' + netIncome.toLocaleString('en-IN', {maximumFractionDigits: 0});
+
+            // Show results
+            document.getElementById('results').classList.add('show');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Excel Export Functionality
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const fullName = document.getElementById('fullName').value || 'Not Provided';
+            const panNumber = document.getElementById('panNumber').value || 'Not Provided';
+            const occupation = document.getElementById('occupation').value || 'Not Provided';
+            const regime = document.querySelector('input[name="regime"]:checked').value;
+            const ageCategory = document.getElementById('ageCategory').value;
+            
+            // Collect all form data
+            const data = [
+                ['Indian Income Tax Calculator - FY 2024-25'],
+                [''],
+                ['Personal Information'],
+                ['Full Name', fullName],
+                ['PAN Number', panNumber],
+                ['Occupation', occupation],
+                ['Age Category', ageCategory],
+                ['Tax Regime', regime === 'new' ? 'New Regime' : 'Old Regime'],
+                [''],
+                ['Income Details'],
+                ['Gross Annual Salary', parseFloat(document.getElementById('grossIncome').value) || 0],
+                ['Professional Tax Paid', parseFloat(document.getElementById('professionalTax').value) || 0],
+                ['Interest Income', parseFloat(document.getElementById('interestIncome').value) || 0],
+                ['Rental Income', parseFloat(document.getElementById('rentalIncome').value) || 0],
+                ['Business/Professional Income', parseFloat(document.getElementById('businessIncome').value) || 0],
+                ['Intraday Trading Income/Loss', parseFloat(document.getElementById('intradayIncome').value) || 0],
+                ['F&O Trading Income/Loss', parseFloat(document.getElementById('foIncome').value) || 0],
+                ['Dividend Income', parseFloat(document.getElementById('dividendIncome').value) || 0],
+                ['Other Income', parseFloat(document.getElementById('otherIncome').value) || 0],
+                [''],
+                ['Capital Gains'],
+                ['STCG - Equity/Equity MF', parseFloat(document.getElementById('stcgEquity').value) || 0],
+                ['LTCG - Equity/Equity MF', parseFloat(document.getElementById('ltcgEquity').value) || 0],
+                ['STCG - Other Assets', parseFloat(document.getElementById('stcgOther').value) || 0],
+                ['LTCG - Other Assets', parseFloat(document.getElementById('ltcgOther').value) || 0],
+                ['Crypto/VDA Income', parseFloat(document.getElementById('cryptoIncome').value) || 0],
+                ['']
+            ];
+
+            // Add deductions if old regime
+            if (regime === 'old') {
+                data.push(['Deductions (Old Regime)']);
+                data.push(['Standard Deduction', parseFloat(document.getElementById('standardDeduction').value) || 0]);
+                data.push(['Section 80C', parseFloat(document.getElementById('sec80C').value) || 0]);
+                data.push(['Section 80CCD(1B)', parseFloat(document.getElementById('sec80CCD1B').value) || 0]);
+                data.push(['Section 80D - Self', parseFloat(document.getElementById('sec80D').value) || 0]);
+                data.push(['Section 80D - Parents', parseFloat(document.getElementById('sec80DParents').value) || 0]);
+                data.push(['Section 80E', parseFloat(document.getElementById('sec80E').value) || 0]);
+                data.push(['Section 80EE', parseFloat(document.getElementById('sec80EE').value) || 0]);
+                data.push(['Section 80G', parseFloat(document.getElementById('sec80G').value) || 0]);
+                data.push(['Section 80GG', parseFloat(document.getElementById('sec80GG').value) || 0]);
+                data.push(['Section 80TTA/TTB', parseFloat(document.getElementById('sec80TTA').value) || 0]);
+                data.push(['Section 80U', parseFloat(document.getElementById('sec80U').value) || 0]);
+                data.push(['HRA Exemption', parseFloat(document.getElementById('hra').value) || 0]);
+                data.push(['Home Loan Interest', parseFloat(document.getElementById('homeLoanInterest').value) || 0]);
+                data.push(['LTA Exemption', parseFloat(document.getElementById('lta').value) || 0]);
+            } else {
+                data.push(['Deductions (New Regime)']);
+                data.push(['Standard Deduction', parseFloat(document.getElementById('newStandardDeduction').value) || 0]);
+            }
+
+            data.push(['']);
+            data.push(['Note: Please calculate tax first to see recommended ITR form']);
+            data.push(['']);
+            data.push(['Developed and Designed by Shamsudeen EP']);
+
+            // Create workbook and worksheet
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+
+            // Set column widths
+            ws['!cols'] = [{ wch: 30 }, { wch: 20 }];
+
+            // Add worksheet to workbook
+            XLSX.utils.book_append_sheet(wb, ws, 'Tax Calculation');
+
+            // Generate filename with date
+            const date = new Date().toISOString().split('T')[0];
+            const filename = `Tax_Return_${fullName.replace(/\s+/g, '_')}_${date}.xlsx`;
+
+            // Save file
+            XLSX.writeFile(wb, filename);
+        });
+
+        // Excel Import Functionality
+        document.getElementById('importBtn').addEventListener('click', function() {
+            document.getElementById('importFile').click();
+        });
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+
+                    // Parse the data and populate form
+                    for (let i = 0; i < jsonData.length; i++) {
+                        const row = jsonData[i];
+                        if (!row[0]) continue;
+
+                        // Personal Information
+                        if (row[0] === 'Full Name' && row[1]) document.getElementById('fullName').value = row[1];
+                        if (row[0] === 'PAN Number' && row[1]) document.getElementById('panNumber').value = row[1];
+                        if (row[0] === 'Occupation' && row[1]) document.getElementById('occupation').value = row[1];
+                        if (row[0] === 'Age Category' && row[1]) document.getElementById('ageCategory').value = row[1];
+                        if (row[0] === 'Tax Regime' && row[1]) {
+                            if (row[1] === 'New Regime') {
+                                document.getElementById('newRegime').checked = true;
+                                document.getElementById('deductionsSection').style.display = 'none';
+                                document.getElementById('newRegimeDeductions').style.display = 'block';
+                            } else {
+                                document.getElementById('oldRegime').checked = true;
+                                document.getElementById('deductionsSection').style.display = 'block';
+                                document.getElementById('newRegimeDeductions').style.display = 'none';
+                            }
+                        }
+
+                        // Income Details
+                        if (row[0] === 'Gross Annual Salary' && row[1]) document.getElementById('grossIncome').value = row[1];
+                        if (row[0] === 'Professional Tax Paid' && row[1]) document.getElementById('professionalTax').value = row[1];
+                        if (row[0] === 'Interest Income' && row[1]) document.getElementById('interestIncome').value = row[1];
+                        if (row[0] === 'Rental Income' && row[1]) document.getElementById('rentalIncome').value = row[1];
+                        if (row[0] === 'Business/Professional Income' && row[1]) document.getElementById('businessIncome').value = row[1];
+                        if (row[0] === 'Intraday Trading Income/Loss' && row[1]) document.getElementById('intradayIncome').value = row[1];
+                        if (row[0] === 'F&O Trading Income/Loss' && row[1]) document.getElementById('foIncome').value = row[1];
+                        if (row[0] === 'Dividend Income' && row[1]) document.getElementById('dividendIncome').value = row[1];
+                        if (row[0] === 'Other Income' && row[1]) document.getElementById('otherIncome').value = row[1];
+
+                        // Capital Gains
+                        if (row[0] === 'STCG - Equity/Equity MF' && row[1]) document.getElementById('stcgEquity').value = row[1];
+                        if (row[0] === 'LTCG - Equity/Equity MF' && row[1]) document.getElementById('ltcgEquity').value = row[1];
+                        if (row[0] === 'STCG - Other Assets' && row[1]) document.getElementById('stcgOther').value = row[1];
+                        if (row[0] === 'LTCG - Other Assets' && row[1]) document.getElementById('ltcgOther').value = row[1];
+                        if (row[0] === 'Crypto/VDA Income' && row[1]) document.getElementById('cryptoIncome').value = row[1];
+
+                        // Deductions (Old Regime)
+                        if (row[0] === 'Standard Deduction' && row[1]) document.getElementById('standardDeduction').value = row[1];
+                        if (row[0] === 'Section 80C' && row[1]) document.getElementById('sec80C').value = row[1];
+                        if (row[0] === 'Section 80CCD(1B)' && row[1]) document.getElementById('sec80CCD1B').value = row[1];
+                        if (row[0] === 'Section 80D - Self' && row[1]) document.getElementById('sec80D').value = row[1];
+                        if (row[0] === 'Section 80D - Parents' && row[1]) document.getElementById('sec80DParents').value = row[1];
+                        if (row[0] === 'Section 80E' && row[1]) document.getElementById('sec80E').value = row[1];
+                        if (row[0] === 'Section 80EE' && row[1]) document.getElementById('sec80EE').value = row[1];
+                        if (row[0] === 'Section 80G' && row[1]) document.getElementById('sec80G').value = row[1];
+                        if (row[0] === 'Section 80GG' && row[1]) document.getElementById('sec80GG').value = row[1];
+                        if (row[0] === 'Section 80TTA/TTB' && row[1]) document.getElementById('sec80TTA').value = row[1];
+                        if (row[0] === 'Section 80U' && row[1]) document.getElementById('sec80U').value = row[1];
+                        if (row[0] === 'HRA Exemption' && row[1]) document.getElementById('hra').value = row[1];
+                        if (row[0] === 'Home Loan Interest' && row[1]) document.getElementById('homeLoanInterest').value = row[1];
+                        if (row[0] === 'LTA Exemption' && row[1]) document.getElementById('lta').value = row[1];
+                    }
+
+                    alert('Data imported successfully!');
+                } catch (error) {
+                    alert('Error importing file. Please make sure it is a valid Excel file.');
+                    console.error(error);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
